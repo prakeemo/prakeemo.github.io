@@ -1,5 +1,7 @@
 #!/bin/zsh
 
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+
 cd -- "$(dirname "$0")/.."
 
 echo
@@ -10,4 +12,3 @@ node tools/run-test-server.js
 
 echo
 read -r "dummy?계속하려면 Enter 키를 누르세요..."
-

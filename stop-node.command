@@ -6,4 +6,3 @@ sleep 1
 
 echo "완료되었습니다."
 read -r "dummy?계속하려면 Enter 키를 누르세요..."
-
