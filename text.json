@@ -1,0 +1,18 @@
+[
+  {
+    "id": "테스트",
+    "name": "테스트",
+    "type": "folder",
+    "path": "collection.html?section=text&collection=%E1%84%90%E1%85%A6%E1%84%89%E1%85%B3%E1%84%90%E1%85%B3",
+    "photoOrder": "asc",
+    "createdAt": 1792052566780.0054
+  },
+  {
+    "id": "test for text",
+    "name": "test for text",
+    "type": "folder",
+    "path": "collection.html?section=text&collection=test%20for%20text",
+    "photoOrder": "asc",
+    "createdAt": 1792052566780.0054
+  }
+]
