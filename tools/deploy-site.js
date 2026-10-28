@@ -13,7 +13,14 @@ const dest = fs.mkdtempSync(path.join(os.tmpdir(), "prakeemo-site-"));
 fs.cpSync(WEB, dest, { recursive: true });
 fs.cpSync(MENU_DIR, path.join(dest, "menu"), { recursive: true });
 
-const result = spawnSync("npx", ["gh-pages", "-d", dest], {
+const result = spawnSync(process.execPath, [
+  path.join(PROJECT, "node_modules", "gh-pages", "bin", "gh-pages.js"),
+  "-d",
+  dest,
+  "--nojekyll",
+  "-u",
+  "junginhwanphotography <260898211+junginhwanphotography@users.noreply.github.com>",
+], {
   cwd: PROJECT,
   stdio: "inherit",
 });

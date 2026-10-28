@@ -9,6 +9,7 @@ const { execSync } = require("child_process");
 const { generateSitemap } = require("./generate-sitemap.js");
 
 const { WEB: ROOT, WORK_DIR, WORK_URL } = require("./paths");
+const { DISPLAY_DIR, makeDisplayJpeg, removeStaleDisplayFiles } = require("./display-photo");
 const IMAGE_EXT = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
 /** 맨 위에 간격을 두는 컬렉션: 폴더 이름이 이 문자로 시작 */
 function isImage(name) {
@@ -132,8 +133,25 @@ async function imagesJsonPathsMatchId(collectionId) {
   }
 }
 
+function leadingPhotoNumber(name) {
+  const stem = path.parse(String(name || "").trim()).name;
+  const match = stem.match(/^(\d+)/);
+  return match ? Number(match[1]) : Number.POSITIVE_INFINITY;
+}
+
+function photoCaption(filename) {
+  const stem = path.parse(String(filename || "").trim()).name;
+  const match = stem.match(/^\d+_(.*)$/);
+  return match ? match[1].trim() : "";
+}
+
 function sortPhotoNames(names) {
-  return [...names].sort((a, b) => a.trim().localeCompare(b.trim(), "en", { numeric: true }));
+  return [...names].sort((a, b) => {
+    const an = leadingPhotoNumber(a);
+    const bn = leadingPhotoNumber(b);
+    if (an !== bn) return an - bn;
+    return a.trim().localeCompare(b.trim(), "en", { numeric: true });
+  });
 }
 
 function isHtmlFile(name) {
@@ -179,10 +197,17 @@ async function generateCollectionImagesJson(collectionId) {
       .filter((e) => e.isFile() && e.name !== "images.json" && isImage(e.name) && !isGalleryExcludedFile(e.name))
       .map((e) => e.name)
   );
-  const images = files.map((file) => ({
-    src: `${WORK_URL}/${collectionId}/${file}`,
-    alt: path.parse(file).name,
-  }));
+  const images = [];
+  let optimized = 0;
+  for (const file of files) {
+    const item = await galleryItem(dir, WORK_URL, collectionId, file);
+    if (item.optimized) optimized += 1;
+    images.push(item.entry);
+  }
+  await removeStaleDisplayFiles(
+    path.join(dir, DISPLAY_DIR),
+    images.map((item) => path.basename(item.src))
+  );
   const data = {
     background: backgroundFile
       ? `${WORK_URL}/${collectionId}/${backgroundFile}`
@@ -190,7 +215,43 @@ async function generateCollectionImagesJson(collectionId) {
     images,
   };
   await fs.writeFile(outFile, JSON.stringify(data, null, 2), "utf8");
-  return { count: images.length, background: backgroundFile };
+  return { count: images.length, background: backgroundFile, optimized };
+}
+
+async function galleryItem(dir, urlPrefix, collectionId, file) {
+  const stem = path.parse(file).name;
+  const alt = photoCaption(file) || stem;
+  if (isHtmlFile(file)) {
+    return {
+      optimized: false,
+      entry: {
+        src: `${urlPrefix}/${collectionId}/${file}`,
+        alt,
+        type: "html",
+      },
+    };
+  }
+  try {
+    const displayName = await makeDisplayJpeg(path.join(dir, file), path.join(dir, DISPLAY_DIR));
+    if (displayName) {
+      return {
+        optimized: true,
+        entry: {
+          src: `${urlPrefix}/${collectionId}/${DISPLAY_DIR}/${displayName}`,
+          alt,
+        },
+      };
+    }
+  } catch (err) {
+    console.error(`⚠️ 화면용 사진 실패 "${file}":`, err.message);
+  }
+  return {
+    optimized: false,
+    entry: {
+      src: `${urlPrefix}/${collectionId}/${file}`,
+      alt,
+    },
+  };
 }
 
 async function runSync() {
@@ -246,9 +307,9 @@ async function runSync() {
   for (const id of collectionDirs) {
     try {
       const entry = byId.get(id);
-      const { count, background } = await generateCollectionImagesJson(id);
+      const { count, background, optimized } = await generateCollectionImagesJson(id);
       const bgNote = background ? `, 배경 ${background}` : "";
-      console.log(`🖼 컬렉션 "${id}" → images.json 갱신 (${count}개 이미지${bgNote})`);
+      console.log(`🖼 컬렉션 "${id}" → images.json 갱신 (${count}개 이미지, 화면용 ${optimized}개${bgNote})`);
       changed = true;
     } catch (err) {
       console.error(`❌ 컬렉션 "${id}" images.json 생성 실패:`, err.message);
@@ -261,8 +322,7 @@ async function runSync() {
     console.log("\n✅ 모든 컬렉션 갱신 완료.");
   }
 
-  changed = (await syncExtraLibrary("Installation Archive", "installation")) || changed;
-  changed = (await syncExtraLibrary("Publication", "publication")) || changed;
+  changed = (await syncExtraLibrary("C.V", "cv")) || changed;
   changed = (await syncExtraLibrary("Text", "text")) || changed;
   changed = (await syncContact()) || changed;
 
@@ -291,7 +351,7 @@ async function syncExtraLibrary(folderName, section) {
       birthtime: Number(stat.birthtimeMs) || 0,
     });
   }
-  births.sort((a, b) => b.birthtime - a.birthtime);
+  births.sort((a, b) => b.birthtime - a.birthtime || a.id.localeCompare(b.id, "ko"));
 
   let previous = [];
   try {
@@ -299,11 +359,26 @@ async function syncExtraLibrary(folderName, section) {
   } catch {
     previous = [];
   }
-  const byId = new Map((Array.isArray(previous) ? previous : []).map((item) => [item.id, item]));
+  const previousList = Array.isArray(previous) ? previous : [];
+  if (section === "cv") {
+    const previousIds = previousList.map((item) => item && item.id).filter(Boolean);
+    const seen = new Set(previousIds);
+    const ordered = [];
+    previousIds.forEach((id) => {
+      const entry = births.find((item) => item.id === id);
+      if (entry) ordered.push(entry);
+    });
+    births.forEach((entry) => {
+      if (!seen.has(entry.id)) ordered.push(entry);
+    });
+    births.splice(0, births.length, ...ordered);
+  }
+  const byId = new Map(previousList.map((item) => [item.id, item]));
   const list = [];
   for (const entry of births) {
     const known = byId.get(entry.id);
     if (section === "text" && !entry.isDir) continue;
+    if (section === "cv" && !entry.isDir) continue;
     if (!entry.isDir) {
       list.push({
         id: entry.id,
@@ -318,6 +393,7 @@ async function syncExtraLibrary(folderName, section) {
     }
     const images = await writeLibraryImages(dir, urlPrefix, entry.id, {
       includeHtml: section === "text",
+      includeGroups: section === "cv",
     });
     list.push({
       id: entry.id,
@@ -327,7 +403,8 @@ async function syncExtraLibrary(folderName, section) {
       photoOrder: "asc",
       createdAt: entry.birthtime,
     });
-    console.log(`🖼 ${folderName} / "${entry.id}" → images.json 갱신 (${images}개 이미지)`);
+    const groupNote = images.groups ? `, 하위폴더 ${images.groups}개` : "";
+    console.log(`🖼 ${folderName} / "${entry.id}" → images.json 갱신 (${images.count}개, 화면용 ${images.optimized}개${groupNote})`);
   }
   await fs.writeFile(catalogFile, JSON.stringify(list, null, 2), "utf8");
   return true;
@@ -347,20 +424,38 @@ async function writeLibraryImages(dir, urlPrefix, collectionId, options) {
       })
       .map((entry) => entry.name)
   );
-  const images = files.map((file) => {
-    const item = {
-      src: `${urlPrefix}/${collectionId}/${file}`,
-      alt: path.parse(file).name,
-    };
-    if (isHtmlFile(file)) item.type = "html";
-    return item;
-  });
-  await fs.writeFile(
-    path.join(folder, "images.json"),
-    JSON.stringify({ background: null, images }, null, 2),
-    "utf8"
+  const images = [];
+  let optimized = 0;
+  for (const file of files) {
+    const item = await galleryItem(folder, urlPrefix, collectionId, file);
+    if (item.optimized) optimized += 1;
+    images.push(item.entry);
+  }
+  await removeStaleDisplayFiles(
+    path.join(folder, DISPLAY_DIR),
+    images.filter((item) => item.src.includes(`/${DISPLAY_DIR}/`)).map((item) => path.basename(item.src))
   );
-  return images.length;
+  const groups = [];
+  if (options && options.includeGroups) {
+    const subdirs = sortPhotoNames(
+      entries
+        .filter(
+          (entry) =>
+            entry.isDirectory() && !entry.name.startsWith(".") && entry.name !== DISPLAY_DIR
+        )
+        .map((entry) => entry.name)
+    );
+    for (const name of subdirs) {
+      const sub = await writeLibraryImages(folder, `${urlPrefix}/${collectionId}`, name, {
+        includeHtml,
+      });
+      groups.push({ title: name, images: sub.images });
+    }
+  }
+  const data = { background: null, images };
+  if (groups.length) data.groups = groups;
+  await fs.writeFile(path.join(folder, "images.json"), JSON.stringify(data, null, 2), "utf8");
+  return { count: images.length, optimized, images, groups: groups.length };
 }
 
 async function syncContact() {

@@ -1,0 +1,69 @@
+{
+  "background": null,
+  "images": [
+    {
+      "src": "menu/C.V/Circuit - Suejin Hong, 2025 (single channel video work) Drone Operation/display/1.jpg",
+      "alt": "1"
+    },
+    {
+      "src": "menu/C.V/Circuit - Suejin Hong, 2025 (single channel video work) Drone Operation/display/2.jpg",
+      "alt": "2"
+    },
+    {
+      "src": "menu/C.V/Circuit - Suejin Hong, 2025 (single channel video work) Drone Operation/display/3.jpg",
+      "alt": "3"
+    },
+    {
+      "src": "menu/C.V/Circuit - Suejin Hong, 2025 (single channel video work) Drone Operation/display/4.jpg",
+      "alt": "4"
+    },
+    {
+      "src": "menu/C.V/Circuit - Suejin Hong, 2025 (single channel video work) Drone Operation/display/5.jpg",
+      "alt": "5"
+    },
+    {
+      "src": "menu/C.V/Circuit - Suejin Hong, 2025 (single channel video work) Drone Operation/display/6.jpg",
+      "alt": "6"
+    }
+  ],
+  "groups": [
+    {
+      "title": "Exhibition at Kunst(zeus)haus (Switzerland)",
+      "images": [
+        {
+          "src": "menu/C.V/Circuit - Suejin Hong, 2025 (single channel video work) Drone Operation/Exhibition at Kunst(zeus)haus (Switzerland)/display/1.jpg",
+          "alt": "1"
+        },
+        {
+          "src": "menu/C.V/Circuit - Suejin Hong, 2025 (single channel video work) Drone Operation/Exhibition at Kunst(zeus)haus (Switzerland)/display/2.jpg",
+          "alt": "2"
+        },
+        {
+          "src": "menu/C.V/Circuit - Suejin Hong, 2025 (single channel video work) Drone Operation/Exhibition at Kunst(zeus)haus (Switzerland)/display/3.jpg",
+          "alt": "3"
+        }
+      ]
+    },
+    {
+      "title": "test",
+      "images": [
+        {
+          "src": "menu/C.V/Circuit - Suejin Hong, 2025 (single channel video work) Drone Operation/test/display/3.jpg",
+          "alt": "3"
+        },
+        {
+          "src": "menu/C.V/Circuit - Suejin Hong, 2025 (single channel video work) Drone Operation/test/display/4.jpg",
+          "alt": "4"
+        },
+        {
+          "src": "menu/C.V/Circuit - Suejin Hong, 2025 (single channel video work) Drone Operation/test/display/5.jpg",
+          "alt": "5"
+        },
+        {
+          "src": "menu/C.V/Circuit - Suejin Hong, 2025 (single channel video work) Drone Operation/test/display/6.jpg",
+          "alt": "6"
+        }
+      ]
+    }
+  ]
+}

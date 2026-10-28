@@ -14,6 +14,13 @@
     "createdAt": 1787821003245.978
   },
   {
+    "id": "test collectiom",
+    "name": "test collectiom",
+    "path": "collection.html?collection=test%20collectiom",
+    "photoOrder": "asc",
+    "createdAt": 1787821003245.978
+  },
+  {
     "id": "shizuoka",
     "name": "shizuoka",
     "path": "collection.html?collection=shizuoka",

@@ -43,8 +43,7 @@ async function readCollectionFile(name) {
 async function publicCollections() {
   const groups = await Promise.all([
     readCollectionFile("collections.json"),
-    readCollectionFile("installation.json"),
-    readCollectionFile("publication.json"),
+    readCollectionFile("cv.json"),
   ]);
   return groups.flat();
 }

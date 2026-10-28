@@ -173,6 +173,214 @@ body.menu-open .topbar {
   right: 0;
 }
 
+.cv-doc {
+  margin-top: 64px;
+  padding: 28px 34px 80px;
+  color: #000;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.cv-doc h1 {
+  margin: 0;
+  font-family: "Arial Black", Arial, Helvetica, sans-serif;
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+.cv-doc .cv-name {
+  margin: 10px 0 0;
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  white-space: pre-wrap;
+}
+
+.cv-doc ul {
+  margin: 42px 0 0;
+  padding-left: 0;
+  list-style: none;
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.cv-doc li {
+  position: relative;
+  margin: 0.7em 0;
+  padding-left: 1.15em;
+}
+
+.cv-doc li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  top: 0;
+  line-height: inherit;
+}
+
+.cv-entry button {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cv-photos {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s ease;
+}
+
+.cv-photos.is-open {
+  grid-template-rows: 1fr;
+}
+
+.cv-photos-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cv-photos.is-open .cv-photos-inner {
+  padding-top: 14px;
+}
+
+.cv-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  width: min(720px, 100%);
+}
+
+.cv-entry > button.is-static {
+  cursor: default;
+}
+
+.cv-group {
+  margin: 6px 0 0 28px;
+}
+
+.cv-entry .cv-group-title {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.78em;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cv-photos img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  height: auto;
+  margin: 0;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.cv-lightbox {
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cv-lightbox[hidden] {
+  display: none !important;
+}
+
+.cv-lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.9);
+  cursor: pointer;
+}
+
+.cv-lightbox-photo {
+  position: relative;
+  z-index: 1;
+  display: block;
+  max-width: min(1100px, calc(100vw - 140px));
+  max-height: calc(100vh - 80px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.cv-lightbox-close,
+.cv-lightbox-nav {
+  position: fixed;
+  z-index: 2;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.cv-lightbox-close {
+  top: 16px;
+  right: 22px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.cv-lightbox-nav {
+  top: 50%;
+  width: 44px;
+  height: 64px;
+  transform: translateY(-50%);
+}
+
+.cv-lightbox-nav span {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+}
+
+.cv-lightbox-prev {
+  left: 16px;
+}
+
+.cv-lightbox-prev span {
+  transform: rotate(-45deg);
+  margin-left: 10px;
+}
+
+.cv-lightbox-next {
+  right: 16px;
+}
+
+.cv-lightbox-next span {
+  transform: rotate(135deg);
+  margin-left: 6px;
+}
+
+.cv-lightbox-close:hover,
+.cv-lightbox-nav:hover {
+  opacity: 0.45;
+}
+
 .about-board {
   margin-top: 64px;
   display: grid;
@@ -243,6 +451,20 @@ body.menu-open .topbar {
 body[data-menu="text"] .work-index nav {
   font-size: 21px;
   line-height: 1.6;
+}
+
+@media (min-width: 801px) {
+  body[data-menu="work"] .work-index {
+    justify-content: flex-start;
+    /* 30px일 때 "paris to rome" 너비 뒤에 살짝 붙여 왼쪽 정렬을 시작한다 */
+    padding-left: calc(max(72px, 11vw) + 165px);
+  }
+
+  body[data-menu="work"] .work-index nav {
+    align-items: flex-start;
+    text-align: left;
+    font-size: 42px;
+  }
 }
 
 .work-index a {
@@ -532,31 +754,44 @@ body[data-menu="text"] .work-index nav {
 
 .caption {
   position: absolute;
+  inset: 0;
   z-index: 5;
-  left: 27px;
-  right: 16px;
-  bottom: 36px;
-  width: 180px;
+  width: auto;
+  max-width: none;
   font-family: Georgia, "Crimson Text", serif;
   font-size: 12px;
   line-height: 1.45;
+  pointer-events: none;
 }
 
 .caption p {
   margin: 0;
 }
 
+#caption-text {
+  position: absolute;
+  pointer-events: auto;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1;
+  color: #000;
+}
+
 #counter {
-  margin-top: 1.2em;
+  position: absolute;
+  left: 27px;
+  bottom: 36px;
+  pointer-events: auto;
 }
 
 .essay-jump {
   position: absolute;
-  left: 50%;
-  bottom: 10px;
-  z-index: 3;
-  transform: translateX(-50%);
-  width: 40px;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 5;
+  width: 100%;
   height: 20px;
   border: 0;
   background: transparent;
@@ -567,10 +802,15 @@ body[data-menu="text"] .work-index nav {
   display: block;
   width: 12px;
   height: 12px;
-  margin: 2px auto 0;
+  margin: 4px auto 0;
   border-right: 1px solid #111;
   border-bottom: 1px solid #111;
   transform: rotate(45deg);
+}
+
+.page-collection.is-narrative-open .essay-jump span {
+  margin-top: 8px;
+  transform: rotate(225deg);
 }
 
 .overview {
@@ -615,31 +855,69 @@ body[data-menu="text"] .work-index nav {
   font-size: 13px;
 }
 
+.page-collection.has-narrative .viewer {
+  position: fixed;
+  top: 64px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  margin-top: 0;
+  min-height: 0;
+}
+
 .essay {
   position: relative;
-  margin-top: 20px;
-  padding: 48px 8vw 80px;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: saturate(120%) blur(16px);
+  z-index: 4;
+  margin-top: calc(100vh - 20px);
+  padding: 36px 0 80px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.page-collection.is-narrative-open .essay {
+  background: rgba(255, 255, 255, 0.3);
+  -webkit-backdrop-filter: saturate(120%) blur(20px);
+  backdrop-filter: saturate(120%) blur(20px);
 }
 
 .essay-columns {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 48px;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
 }
 
-.essay-col h2 {
-  margin: 0 0 1.2em;
-  font-size: 22px;
+.essay-rule {
+  width: 1px;
+  background: #111;
+  margin: 8px 0 0;
+}
+
+.essay-col {
+  margin: 0;
+  padding: 8px 34px 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, "Noto Sans KR", sans-serif;
+  font-size: 17px;
   font-weight: 400;
-  text-align: center;
+  line-height: 1.62;
 }
 
-.essay-col p {
-  margin: 0 0 1em;
-  font-size: 15px;
-  line-height: 1.55;
+.essay-title {
+  margin: 28px 0 10px;
+  text-align: center;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.essay-sub {
+  margin: 0 0 36px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.essay-body {
   white-space: pre-wrap;
 }
 
@@ -661,6 +939,72 @@ body[data-menu="text"] .work-index nav {
   .site-menu a span::after {
     height: 1px;
     bottom: 1px;
+  }
+
+  .cv-doc {
+    padding: 20px 18px 64px;
+  }
+
+  .cv-doc h1 {
+    font-size: 34px;
+  }
+
+  .cv-doc .cv-name {
+    font-size: 20px;
+  }
+
+  .cv-doc ul {
+    margin-top: 24px;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+
+  .cv-entry .cv-group-title {
+    font-size: 14px;
+  }
+
+  .cv-group {
+    margin-left: 18px;
+  }
+
+  .cv-lightbox-photo {
+    max-width: calc(100vw - 72px);
+  }
+
+  .cv-lightbox-prev {
+    left: 4px;
+  }
+
+  .cv-lightbox-next {
+    right: 4px;
+  }
+
+  .essay-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .essay-rule {
+    width: 100%;
+    height: 1px;
+    margin: 28px 0;
+  }
+
+  .essay-col {
+    padding: 0 20px;
+    font-size: 14px;
+  }
+
+  #caption-text {
+    font-size: 16px;
+  }
+
+  .essay-title {
+    font-size: 18px;
+  }
+
+  .essay-sub {
+    margin-bottom: 24px;
+    font-size: 12px;
   }
 
   .about-board {
@@ -686,6 +1030,13 @@ body[data-menu="text"] .work-index nav {
     text-align: left;
     font-size: 17px;
     line-height: 1.85;
+  }
+
+  body[data-menu="work"] .work-index nav {
+    align-items: center;
+    text-align: center;
+    font-size: 20px;
+    line-height: 2.2;
   }
 
   body[data-menu="text"] .work-index nav {
@@ -849,15 +1200,9 @@ body[data-menu="text"] .work-index nav {
     max-height: 70vh;
   }
 
-  .caption {
-    position: fixed;
+  #counter {
     left: 16px;
-    right: auto;
     bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-    z-index: 6;
-    width: auto;
-    max-width: calc(100% - 32px);
-    padding: 0;
   }
 
   .slide-prev {

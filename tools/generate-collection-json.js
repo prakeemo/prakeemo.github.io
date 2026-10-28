@@ -2,6 +2,7 @@ const fs = require("fs").promises;
 const path = require("path");
 
 const { WORK_DIR, WORK_URL } = require("./paths");
+const { DISPLAY_DIR, makeDisplayJpeg, removeStaleDisplayFiles } = require("./display-photo");
 // 환경변수로 전달 시 # 등 특수문자가 Windows에서도 안전하게 전달됨
 const COLLECTION_NAME = process.env.COLLECTION_ID || process.argv[2];
 
@@ -55,10 +56,27 @@ async function main() {
       .filter((entry) => entry.isFile() && isBackgroundFile(entry.name))
       .map((entry) => entry.name)[0];
 
-    const images = files.map((file) => ({
-      src: `${WORK_URL}/${COLLECTION_NAME}/${file}`,
-      alt: path.parse(file).name,
-    }));
+    const images = [];
+    for (const file of files) {
+      const stem = path.parse(file).name;
+      const caption = stem.match(/^\d+_(.*)$/);
+      const alt = caption && caption[1].trim() ? caption[1].trim() : stem;
+      let src = `${WORK_URL}/${COLLECTION_NAME}/${file}`;
+      try {
+        const displayName = await makeDisplayJpeg(
+          path.join(COLLECTION_DIR, file),
+          path.join(COLLECTION_DIR, DISPLAY_DIR)
+        );
+        if (displayName) src = `${WORK_URL}/${COLLECTION_NAME}/${DISPLAY_DIR}/${displayName}`;
+      } catch (err) {
+        console.error(`⚠️ 화면용 사진 실패 "${file}":`, err.message);
+      }
+      images.push({ src, alt });
+    }
+    await removeStaleDisplayFiles(
+      path.join(COLLECTION_DIR, DISPLAY_DIR),
+      images.map((item) => path.basename(item.src))
+    );
 
     const data = {
       background: backgroundFile

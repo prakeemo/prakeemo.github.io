@@ -1,5 +1,5 @@
 (function () {
-  const SITE_NAME = "prakeemo";
+  const SITE_NAME = "Kim donghyun";
 
   function displayName(id) {
     const raw = id && String(id).startsWith("_") ? String(id).slice(1) : String(id || "");
@@ -17,17 +17,11 @@
       catalog: "collections.json",
       back: "work.html",
     },
-    installation: {
-      id: "installation",
-      folder: "Installation Archive",
-      catalog: "installation.json",
-      back: "installation.html",
-    },
-    publication: {
-      id: "publication",
-      folder: "Publication",
-      catalog: "publication.json",
-      back: "publication.html",
+    cv: {
+      id: "cv",
+      folder: "C.V",
+      catalog: "cv.json",
+      back: "cv.html",
     },
     text: {
       id: "text",
@@ -42,14 +36,18 @@
   }
 
   function imageUrl(collectionId, item, folder) {
-    const filename = fileStem(item && item.src) && (item.src.split("/").pop() || item.src);
+    const src = String((item && item.src) || "");
+    if (src.startsWith("menu/")) {
+      return src.split("/").map((part) => encodeURIComponent(part)).join("/");
+    }
+    const filename = src.split("/").pop() || "";
     return (
       "menu/" +
       encodeURIComponent(folder || "Work") +
       "/" +
       encodeURIComponent(collectionId) +
       "/" +
-      encodeURIComponent(filename || "")
+      encodeURIComponent(filename)
     );
   }
 
@@ -62,12 +60,25 @@
         const stem = fileStem(item.src).trim().toLowerCase();
         return stem !== "background" && stem !== "bsckground" && !stem.startsWith("bg-");
       })
-      .sort((a, b) => fileStem(a.src).trim().localeCompare(fileStem(b.src).trim(), "en", { numeric: true }));
+      .sort((a, b) => {
+        const an = leadingPhotoNumber(fileStem(a.src));
+        const bn = leadingPhotoNumber(fileStem(b.src));
+        if (an !== bn) return an - bn;
+        return fileStem(a.src).trim().localeCompare(fileStem(b.src).trim(), "en", { numeric: true });
+      });
+
+  function leadingPhotoNumber(name) {
+    const match = String(name || "").trim().match(/^(\d+)/);
+    return match ? Number(match[1]) : Number.POSITIVE_INFINITY;
+  }
   }
 
   function captionFor(item) {
+    const stem = fileStem(item && item.src).trim();
+    const indexed = stem.match(/^\d+_(.*)$/);
+    if (indexed && indexed[1].trim()) return indexed[1].trim();
     const alt = item && item.alt ? String(item.alt).trim() : "";
-    if (!alt || alt === fileStem(item.src).trim()) return "";
+    if (!alt || alt === stem) return "";
     return alt;
   }
 
@@ -94,35 +105,162 @@
     return visibleImages(await res.json());
   }
 
-  async function loadDescription(collectionId, folder) {
-    const res = await fetch(
+  async function loadNarratives(collectionId, folder) {
+    const base =
       "menu/" +
-        encodeURIComponent(folder || "Work") +
-        "/" +
-        encodeURIComponent(collectionId) +
-        "/description.txt",
-      { cache: "no-store" }
-    );
-    if (!res.ok) return [];
-    const text = await res.text();
-    return text
-      .replace(/^\uFEFF/, "")
-      .split(/\n---\n/)
-      .map(parseDescriptionBlock)
-      .filter(Boolean);
+      encodeURIComponent(folder || "Work") +
+      "/" +
+      encodeURIComponent(collectionId) +
+      "/";
+    const [ko, en] = await Promise.all([
+      readNarrative(base, "네러티브_ko"),
+      readNarrative(base, "네러티브_en"),
+    ]);
+    return { ko: ko, en: en };
   }
 
-  function parseDescriptionBlock(block) {
-    const lines = String(block || "").trim().split(/\n/);
-    const filled = lines.filter((line) => line.trim());
-    if (!filled.length) return null;
-    if (lines.length > 1 && lines[1].trim() === "") {
-      return {
-        title: lines[0].trim(),
-        body: lines.slice(2).join("\n").trim(),
-      };
+  async function readNarrative(base, stem) {
+    const txt = await readText(base + encodeURIComponent(stem + ".txt"));
+    if (txt) return txt;
+    const rtf = await readText(base + encodeURIComponent(stem + ".rtf"));
+    return rtf ? rtfToText(rtf) : "";
+  }
+
+  function rtfToText(raw) {
+    const rtf = String(raw || "");
+    if (!/^\{\\rtf/i.test(rtf.trim())) return rtf.replace(/^\uFEFF/, "").trim();
+    let i = 0;
+    let uc = 1;
+    let out = "";
+    const skipWords = { fonttbl: 1, colortbl: 1, stylesheet: 1, info: 1, pict: 1, datastore: 1 };
+
+    function peekSkip(index) {
+      if (rtf[index] !== "\\") return false;
+      if (rtf[index + 1] === "*") return true;
+      let j = index + 1;
+      while (j < rtf.length && /[a-zA-Z]/.test(rtf[j])) j += 1;
+      return Boolean(skipWords[rtf.slice(index + 1, j).toLowerCase()]);
     }
-    return { title: "", body: lines.join("\n").trim() };
+
+    function parse(skip) {
+      while (i < rtf.length) {
+        const ch = rtf[i];
+        if (ch === "{") {
+          i += 1;
+          parse(skip || peekSkip(i));
+          continue;
+        }
+        if (ch === "}") {
+          i += 1;
+          return;
+        }
+        if (ch === "\\") {
+          const next = rtf[i + 1];
+          if (next === "\\" || next === "{" || next === "}") {
+            if (!skip) out += next;
+            i += 2;
+            continue;
+          }
+          if (next === "\n" || next === "\r") {
+            if (!skip) out += "\n";
+            i += 2;
+            if (next === "\r" && rtf[i] === "\n") i += 1;
+            continue;
+          }
+          if (next === "'") {
+            const bytes = [];
+            while (rtf[i] === "\\" && rtf[i + 1] === "'") {
+              const hex = rtf.slice(i + 2, i + 4);
+              if (!/^[0-9a-fA-F]{2}$/.test(hex)) break;
+              bytes.push(parseInt(hex, 16));
+              i += 4;
+            }
+            if (!skip && bytes.length) out += decodeCp949(bytes);
+            continue;
+          }
+          let j = i + 1;
+          while (j < rtf.length && /[a-zA-Z]/.test(rtf[j])) j += 1;
+          const word = rtf.slice(i + 1, j).toLowerCase();
+          let sign = "";
+          if (rtf[j] === "-") {
+            sign = "-";
+            j += 1;
+          }
+          let digits = "";
+          while (j < rtf.length && /[0-9]/.test(rtf[j])) {
+            digits += rtf[j];
+            j += 1;
+          }
+          if (rtf[j] === " ") j += 1;
+          if (word === "uc" && digits) uc = parseInt(sign + digits, 10) || 0;
+          if (!skip && word === "u" && digits) {
+            let code = parseInt(sign + digits, 10);
+            if (code < 0) code += 65536;
+            out += String.fromCharCode(code);
+            let left = uc;
+            while (left > 0 && j < rtf.length) {
+              j += 1;
+              left -= 1;
+            }
+          }
+          if (!skip && (word === "par" || word === "line")) out += "\n";
+          i = j;
+          continue;
+        }
+        if (!skip && ch !== "\r" && ch !== "\n") out += ch;
+        i += 1;
+      }
+    }
+
+    if (rtf[0] === "{") i = 1;
+    parse(false);
+    return out.replace(/\u0000/g, "").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+  }
+
+  function decodeCp949(bytes) {
+    try {
+      return new TextDecoder("euc-kr").decode(Uint8Array.from(bytes));
+    } catch (err) {
+      return bytes.map((byte) => String.fromCharCode(byte)).join("");
+    }
+  }
+
+  function splitNarrative(text) {
+    const lines = String(text || "")
+      .replace(/\r\n/g, "\n")
+      .split("\n")
+      .map((line) => line.trim());
+    while (lines.length && !lines[0]) lines.shift();
+    if (lines.length >= 3 && lines[0] && lines[1] && !lines[2]) {
+      let index = 3;
+      while (index < lines.length && !lines[index]) index += 1;
+      return { title: lines[0], subtitle: lines[1], body: lines.slice(index).join("\n").trim() };
+    }
+    return { title: "", subtitle: "", body: lines.join("\n").trim() };
+  }
+
+  function fillNarrative(el, text) {
+    if (!el) return;
+    el.textContent = "";
+    const parts = splitNarrative(text);
+    if (parts.title) {
+      const title = document.createElement("h2");
+      title.className = "essay-title";
+      title.textContent = parts.title;
+      el.appendChild(title);
+    }
+    if (parts.subtitle) {
+      const subtitle = document.createElement("p");
+      subtitle.className = "essay-sub";
+      subtitle.textContent = parts.subtitle;
+      el.appendChild(subtitle);
+    }
+    if (parts.body) {
+      const body = document.createElement("div");
+      body.className = "essay-body";
+      body.textContent = parts.body;
+      el.appendChild(body);
+    }
   }
 
   function setText(id, value) {
@@ -147,34 +285,6 @@
       photo.style.backgroundImage = 'url("' + src + '")';
       photo.classList.add("is-ready");
     } catch (err) {}
-  }
-
-  async function initHome() {
-    const list = document.getElementById("work-list");
-    if (!list) return;
-    const collections = await loadCollections();
-    const groups = await Promise.all(collections.map((item) => loadImages(item.id)));
-    list.textContent = "";
-    collections.forEach((item, index) => {
-      const images = groups[index];
-      if (!images.length) return;
-      const link = document.createElement("a");
-      link.className = "work-card";
-      link.href = "collection.html?collection=" + encodeURIComponent(item.id);
-      const shot = document.createElement("span");
-      shot.className = "shot";
-      shot.style.backgroundImage = 'url("' + imageUrl(item.id, images[0]) + '")';
-      const veil = document.createElement("span");
-      veil.className = "veil";
-      const info = document.createElement("span");
-      info.className = "info";
-      const title = document.createElement("span");
-      title.className = "title";
-      title.textContent = displayName(item.id);
-      info.appendChild(title);
-      link.append(shot, veil, info);
-      list.appendChild(link);
-    });
   }
 
   async function initWorkIndex() {
@@ -278,7 +388,8 @@
     setText("collection-name", name);
 
     const images = await loadImages(collectionId, library.folder);
-    const columns = await loadDescription(collectionId, library.folder);
+    const narrative = await loadNarratives(collectionId, library.folder);
+    const hasNarrative = Boolean(narrative.ko || narrative.en);
     const imageEl = document.getElementById("slide-image");
     const htmlEl = document.getElementById("slide-html");
     const captionEl = document.getElementById("caption-text");
@@ -286,7 +397,6 @@
     const overview = document.getElementById("overview");
     const viewer = document.getElementById("viewer");
     const essay = document.getElementById("essay");
-    const essayColumns = document.getElementById("essay-columns");
     const overviewBtn = document.getElementById("overview-toggle");
     if (!imageEl || !images.length) return;
 
@@ -322,6 +432,7 @@
             host.appendChild(style);
           }
           host.appendChild(rendered.fragment);
+          requestAnimationFrame(placeCaption);
         })
         .catch(() => {});
     }
@@ -348,7 +459,11 @@
       }
       imageEl.style.visibility = "";
       if (htmlEl) htmlEl.style.visibility = "";
-      if (captionEl) captionEl.textContent = captionFor(item);
+      if (captionEl) {
+        const caption = captionFor(item);
+        captionEl.textContent = caption;
+        captionEl.hidden = !caption;
+      }
       if (counterEl) counterEl.textContent = "(" + (index + 1) + " / " + images.length + ")";
       if (overview) {
         overview.querySelectorAll(".overview-item").forEach((button, buttonIndex) => {
@@ -356,13 +471,65 @@
         });
       }
       clearTrack();
+      warmNeighbors();
+      requestAnimationFrame(placeSlideButtons);
     }
+
+    function placeCaption() {
+      if (!captionEl || !viewer || captionEl.hidden) return;
+      const target = imageEl && !imageEl.hidden ? imageEl : htmlEl && !htmlEl.hidden ? htmlEl : null;
+      if (!target) return;
+      const frame = target.getBoundingClientRect();
+      const bounds = viewer.getBoundingClientRect();
+      if (frame.width < 2 || bounds.width < 2) return;
+      captionEl.style.left = frame.left - bounds.left + "px";
+      captionEl.style.top = frame.bottom - bounds.top + 4 + "px";
+      captionEl.style.maxWidth = frame.width + "px";
+    }
+
+    function placeSlideButtons() {
+      placeCaption();
+      const prev = document.querySelector(".slide-prev");
+      const next = document.querySelector(".slide-next");
+      if (!prev || !next || !viewer) return;
+      if (window.innerWidth <= 800) {
+        prev.style.left = "";
+        next.style.right = "";
+        return;
+      }
+      const wrap = photoWrap || imageEl.parentElement;
+      const bounds = viewer.getBoundingClientRect();
+      const wrapRect = wrap.getBoundingClientRect();
+      if (bounds.width < 2 || wrapRect.width < 2) return;
+      const wrapStyle = getComputedStyle(wrap);
+      const padLeft = parseFloat(wrapStyle.paddingLeft) || 0;
+      const padRight = parseFloat(wrapStyle.paddingRight) || 0;
+      const contentW = wrapRect.width - padLeft - padRight;
+      const maxH = parseFloat(getComputedStyle(imageEl).maxHeight) || window.innerHeight - 180;
+      const aspect = 3 / 2;
+      const width = Math.min(contentW, maxH * aspect);
+      const photoLeft = wrapRect.left - bounds.left + padLeft + (contentW - width) / 2;
+      const photoRight = photoLeft + width;
+      const edge = 8;
+      const buttonWidth = 44;
+      const prevCenter = edge + buttonWidth / 2;
+      const nextCenter = bounds.width - edge - buttonWidth / 2;
+      const towardPhoto = 0.4;
+      const nextPrevCenter = prevCenter + (photoLeft - prevCenter) * towardPhoto;
+      const nextNextCenter = nextCenter + (photoRight - nextCenter) * towardPhoto;
+      prev.style.left = Math.max(edge, nextPrevCenter - buttonWidth / 2) + "px";
+      next.style.right = Math.max(edge, bounds.width - (nextNextCenter + buttonWidth / 2)) + "px";
+    }
+
+    imageEl.addEventListener("load", placeSlideButtons);
+    window.addEventListener("resize", placeSlideButtons);
 
     function setOverview(open) {
       overviewOpen = open;
       if (overview) overview.hidden = !open;
       if (viewer) viewer.hidden = open;
-      if (essay) essay.hidden = open || !columns.length;
+      if (essay) essay.hidden = open || !hasNarrative;
+      if (open) window.scrollTo(0, 0);
       if (overviewBtn) overviewBtn.classList.toggle("is-open", open);
     }
 
@@ -388,24 +555,20 @@
       });
     }
 
-    if (essay && essayColumns && columns.length) {
-      essayColumns.textContent = "";
-      columns.forEach((column) => {
-        const col = document.createElement("article");
-        col.className = "essay-col";
-        if (column.title) {
-          const heading = document.createElement("h2");
-          heading.textContent = column.title;
-          col.appendChild(heading);
-        }
-        column.body.split(/\n{2,}/).forEach((paragraph) => {
-          const p = document.createElement("p");
-          p.textContent = paragraph.trim();
-          if (p.textContent) col.appendChild(p);
-        });
-        essayColumns.appendChild(col);
-      });
-      essay.hidden = false;
+    if (hasNarrative) {
+      const koEl = document.getElementById("essay-ko");
+      const enEl = document.getElementById("essay-en");
+      fillNarrative(koEl, narrative.ko);
+      fillNarrative(enEl, narrative.en);
+      document.body.classList.add("has-narrative");
+      if (essay) essay.hidden = false;
+      window.addEventListener(
+        "scroll",
+        () => {
+          document.body.classList.toggle("is-narrative-open", window.scrollY > 24);
+        },
+        { passive: true }
+      );
     }
 
     document.querySelectorAll("[data-slide]").forEach((button) => {
@@ -415,6 +578,25 @@
     });
 
     imageEl.draggable = false;
+    const warmed = new Set();
+
+    function warm(item) {
+      if (!item || isHtmlItem(item)) return;
+      const url = imageUrl(collectionId, item, library.folder);
+      if (warmed.has(url)) return;
+      warmed.add(url);
+      const img = new Image();
+      img.decoding = "async";
+      img.src = url;
+    }
+
+    function warmNeighbors() {
+      const count = images.length;
+      if (count < 2) return;
+      warm(images[(index - 1 + count) % count]);
+      warm(images[(index + 1) % count]);
+    }
+
     let drag = null;
 
     function endDrag() {
@@ -567,9 +749,13 @@
 
     const jump = document.getElementById("essay-jump");
     if (jump) {
-      jump.hidden = !columns.length;
+      jump.hidden = !hasNarrative;
       jump.addEventListener("click", () => {
-        if (essay) essay.scrollIntoView({ behavior: "smooth" });
+        const raised = window.scrollY > 24;
+        window.scrollTo({
+          top: raised ? 0 : Math.round(window.innerHeight / 4),
+          behavior: "smooth",
+        });
       });
     }
 
@@ -585,6 +771,205 @@
     show(0);
   }
 
+  async function initCv() {
+    const lightbox = document.createElement("div");
+    lightbox.className = "cv-lightbox";
+    lightbox.hidden = true;
+    const backdrop = document.createElement("button");
+    backdrop.type = "button";
+    backdrop.className = "cv-lightbox-backdrop";
+    backdrop.setAttribute("aria-label", "닫기");
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "cv-lightbox-close";
+    closeBtn.setAttribute("aria-label", "닫기");
+    closeBtn.textContent = "×";
+    const prevBtn = document.createElement("button");
+    prevBtn.type = "button";
+    prevBtn.className = "cv-lightbox-nav cv-lightbox-prev";
+    prevBtn.setAttribute("aria-label", "이전 사진");
+    const prevMark = document.createElement("span");
+    prevBtn.appendChild(prevMark);
+    const nextBtn = document.createElement("button");
+    nextBtn.type = "button";
+    nextBtn.className = "cv-lightbox-nav cv-lightbox-next";
+    nextBtn.setAttribute("aria-label", "다음 사진");
+    const nextMark = document.createElement("span");
+    nextBtn.appendChild(nextMark);
+    const photo = document.createElement("img");
+    photo.className = "cv-lightbox-photo";
+    photo.alt = "";
+    lightbox.append(backdrop, prevBtn, photo, nextBtn, closeBtn);
+    document.body.appendChild(lightbox);
+
+    let sources = [];
+    let index = 0;
+
+    function showLightbox(nextIndex) {
+      if (!sources.length) return;
+      index = (nextIndex + sources.length) % sources.length;
+      photo.src = sources[index];
+      const single = sources.length < 2;
+      prevBtn.hidden = single;
+      nextBtn.hidden = single;
+      lightbox.hidden = false;
+    }
+
+    function closeLightbox() {
+      lightbox.hidden = true;
+      photo.removeAttribute("src");
+    }
+
+    backdrop.addEventListener("click", closeLightbox);
+    closeBtn.addEventListener("click", closeLightbox);
+    prevBtn.addEventListener("click", () => showLightbox(index - 1));
+    nextBtn.addEventListener("click", () => showLightbox(index + 1));
+    document.addEventListener("keydown", (event) => {
+      if (lightbox.hidden) return;
+      if (event.key === "Escape") closeLightbox();
+      else if (event.key === "ArrowLeft") showLightbox(index - 1);
+      else if (event.key === "ArrowRight") showLightbox(index + 1);
+    });
+
+    const nameEl = document.querySelector(".cv-name");
+    if (nameEl) {
+      fetch("menu/" + encodeURIComponent("C.V") + "/" + encodeURIComponent("C.V.txt"), {
+        cache: "no-store",
+      })
+        .then((res) => (res.ok ? res.text() : ""))
+        .then((text) => {
+          const value = String(text || "").replace(/^\uFEFF/, "").trim();
+          if (value) nameEl.textContent = value;
+        })
+        .catch(() => {});
+    }
+
+    const list = document.getElementById("cv-list");
+    if (list) {
+      let catalog = [];
+      try {
+        const res = await fetch("cv.json", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          catalog = Array.isArray(data) ? data : [];
+        }
+      } catch (err) {
+        catalog = [];
+      }
+      list.textContent = "";
+      catalog.forEach((item) => {
+        if (!item || !item.id || item.type === "file") return;
+        const entry = document.createElement("li");
+        entry.className = "cv-entry";
+        entry.setAttribute("data-folder", item.id);
+        const button = document.createElement("button");
+        button.type = "button";
+        button.setAttribute("aria-expanded", "false");
+        const label = document.createElement("span");
+        label.textContent = displayName(item.name || item.id);
+        button.appendChild(label);
+        const panel = document.createElement("div");
+        panel.className = "cv-photos";
+        const inner = document.createElement("div");
+        inner.className = "cv-photos-inner";
+        panel.appendChild(inner);
+        entry.append(button, panel);
+        list.appendChild(entry);
+      });
+    }
+
+    const entries = document.querySelectorAll(".cv-entry");
+    entries.forEach((entry) => {
+      const button = entry.querySelector(":scope > button");
+      const panel = entry.querySelector(":scope > .cv-photos");
+      const inner = panel && panel.querySelector(".cv-photos-inner");
+      const folder = entry.getAttribute("data-folder");
+      if (!button || !panel || !inner || !folder) return;
+
+      function appendCvGrid(parent, images) {
+        if (!images.length) return;
+        const grid = document.createElement("div");
+        grid.className = "cv-photo-grid";
+        images.forEach((item) => {
+          const img = document.createElement("img");
+          img.alt = "";
+          img.src = String(item.src || "")
+            .split("/")
+            .map((part) => encodeURIComponent(part))
+            .join("/");
+          grid.appendChild(img);
+        });
+        parent.appendChild(grid);
+      }
+
+      async function togglePanel(toggle, photoPanel, photoInner) {
+        const open = toggle.getAttribute("aria-expanded") === "true";
+        if (open) {
+          toggle.setAttribute("aria-expanded", "false");
+          photoPanel.classList.remove("is-open");
+          return;
+        }
+        await Promise.all(
+          [...photoInner.querySelectorAll("img")].map((img) =>
+            img.decode ? img.decode().catch(() => {}) : Promise.resolve()
+          )
+        );
+        toggle.setAttribute("aria-expanded", "true");
+        photoPanel.classList.add("is-open");
+      }
+
+      entry.addEventListener("click", (event) => {
+        const img = event.target.closest("img");
+        const grid = img && img.closest(".cv-photo-grid");
+        if (!img || !grid || !entry.contains(grid)) return;
+        sources = [...grid.querySelectorAll("img")].map((node) => node.currentSrc || node.src);
+        const start = sources.indexOf(img.currentSrc || img.src);
+        showLightbox(start < 0 ? 0 : start);
+      });
+
+      const url =
+        "menu/" +
+        encodeURIComponent("C.V") +
+        "/" +
+        encodeURIComponent(folder) +
+        "/images.json";
+      fetch(url, { cache: "no-store" })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (!data) return;
+          const images = Array.isArray(data.images) ? data.images : [];
+          const groups = Array.isArray(data.groups) ? data.groups : [];
+          inner.textContent = "";
+          appendCvGrid(inner, images);
+          if (!images.length) {
+            panel.hidden = true;
+            button.classList.add("is-static");
+          } else {
+            button.addEventListener("click", () => togglePanel(button, panel, inner));
+          }
+          groups.forEach((group) => {
+            const section = document.createElement("section");
+            section.className = "cv-group";
+            const title = document.createElement("button");
+            title.type = "button";
+            title.className = "cv-group-title";
+            title.setAttribute("aria-expanded", "false");
+            title.textContent = displayName(group.title || "");
+            const subPanel = document.createElement("div");
+            subPanel.className = "cv-photos";
+            const subInner = document.createElement("div");
+            subInner.className = "cv-photos-inner";
+            appendCvGrid(subInner, Array.isArray(group.images) ? group.images : []);
+            subPanel.appendChild(subInner);
+            section.append(title, subPanel);
+            entry.appendChild(section);
+            title.addEventListener("click", () => togglePanel(title, subPanel, subInner));
+          });
+        })
+        .catch(() => {});
+    });
+  }
+
   async function readText(path) {
     const res = await fetch(path, { cache: "no-store" });
     if (!res.ok) return "";
@@ -592,11 +977,8 @@
   }
 
   const MENU_ITEMS = [
-    { id: "about", label: "About", href: "about.html" },
     { id: "work", label: "Work", href: "work.html" },
-    { id: "installation", label: "Installation Archive", href: "installation.html" },
-    { id: "text", label: "Text", href: "text.html" },
-    { id: "publication", label: "Publication", href: "publication.html" },
+    { id: "cv", label: "C.V", href: "cv.html" },
     { id: "contact", label: "Contact", href: "contact.html" },
   ];
 
@@ -781,11 +1163,11 @@
 
   const page = document.body.getAttribute("data-page");
   if (page === "intro") initIntro();
-  else if (page === "home") initHome();
-  else if (page === "work") initWorkIndex();
+  else if (page === "home" || page === "work") initWorkIndex();
   else if (page === "text") initTextIndex();
   else if (page === "archive") initArchive();
   else if (page === "collection") initCollection();
   else if (page === "about" || page === "section") initTextBoard();
+  else if (page === "cv") initCv();
   initContact();
 })();

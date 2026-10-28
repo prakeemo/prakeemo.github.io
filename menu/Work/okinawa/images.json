@@ -2,56 +2,56 @@
   "background": "menu/Work/okinawa/background.gif",
   "images": [
     {
-      "src": "menu/Work/okinawa/1.jpg",
-      "alt": "1"
+      "src": "menu/Work/okinawa/display/1_아침 빛.jpg",
+      "alt": "아침 빛"
     },
     {
-      "src": "menu/Work/okinawa/2.jpg",
-      "alt": "2"
+      "src": "menu/Work/okinawa/display/2_Untitled(2023), 120mm digital.jpg",
+      "alt": "Untitled(2023), 120mm digital"
     },
     {
-      "src": "menu/Work/okinawa/3.jpg",
-      "alt": "3"
+      "src": "menu/Work/okinawa/display/3_시장 그늘.jpg",
+      "alt": "시장 그늘"
     },
     {
-      "src": "menu/Work/okinawa/4.jpg",
-      "alt": "4"
+      "src": "menu/Work/okinawa/display/4_파란 문.jpg",
+      "alt": "파란 문"
     },
     {
-      "src": "menu/Work/okinawa/5.jpg",
-      "alt": "5"
+      "src": "menu/Work/okinawa/display/5_돌에 비.jpg",
+      "alt": "돌에 비"
     },
     {
-      "src": "menu/Work/okinawa/6.jpg",
-      "alt": "6"
+      "src": "menu/Work/okinawa/display/6_항구 불빛.jpg",
+      "alt": "항구 불빛"
     },
     {
-      "src": "menu/Work/okinawa/7.jpg",
-      "alt": "7"
+      "src": "menu/Work/okinawa/display/7_소나무 바람.jpg",
+      "alt": "소나무 바람"
     },
     {
-      "src": "menu/Work/okinawa/8.jpg",
-      "alt": "8"
+      "src": "menu/Work/okinawa/display/8_밤 골목.jpg",
+      "alt": "밤 골목"
     },
     {
-      "src": "menu/Work/okinawa/9.jpg",
-      "alt": "9"
+      "src": "menu/Work/okinawa/display/9_붉은 문.jpg",
+      "alt": "붉은 문"
     },
     {
-      "src": "menu/Work/okinawa/10.jpg",
-      "alt": "10"
+      "src": "menu/Work/okinawa/display/10_조용한 방.jpg",
+      "alt": "조용한 방"
     },
     {
-      "src": "menu/Work/okinawa/11.jpg",
-      "alt": "11"
+      "src": "menu/Work/okinawa/display/11_방파제.jpg",
+      "alt": "방파제"
     },
     {
-      "src": "menu/Work/okinawa/12.jpg",
-      "alt": "12"
+      "src": "menu/Work/okinawa/display/12_버스 창.jpg",
+      "alt": "버스 창"
     },
     {
-      "src": "menu/Work/okinawa/13.jpg",
-      "alt": "13"
+      "src": "menu/Work/okinawa/display/13_마지막 빛.jpg",
+      "alt": "마지막 빛"
     }
   ]
 }
