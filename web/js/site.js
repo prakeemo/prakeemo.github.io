@@ -1,6 +1,6 @@
 (function () {
   const SITE_NAME = "Kim donghyun";
-  const ASSET_V = "20261101b";
+  const ASSET_V = "20261101c";
 
   function assetUrl(path) {
     const value = String(path || "");
