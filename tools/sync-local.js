@@ -289,18 +289,20 @@ async function runSync() {
     console.log(`📁 새 컬렉션 추가: ${id}`);
   }
 
-  // 폴더 생성 시각(birthtime)이 최근인 컬렉션이 위. 수정 시각은 순서를 바꾸지 않는다.
+  // createdAt이 큰 컬렉션이 위. 이미 저장된 값은 유지하고, 새 폴더만 생성 시각을 쓴다.
   const ordered = collectionDirsByCreation
     .filter((entry) => byId.has(entry.id))
     .map((entry) => {
       const c = byId.get(entry.id);
+      const savedAt = Number(c.createdAt);
       return {
         ...c,
-        createdAt: entry.birthtime,
+        createdAt: Number.isFinite(savedAt) && savedAt > 0 ? savedAt : entry.birthtime,
         path: `collection.html?collection=${encodeURIComponent(c.id)}`,
         photoOrder: "asc",
       };
-    });
+    })
+    .sort((a, b) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0));
   await saveCollectionsJson(ordered);
 
   // 모든 컬렉션의 images.json을 매번 재생성 (사진 추가/삭제/변경 반영)
