@@ -28,16 +28,16 @@
     "createdAt": 1792318023000
   },
   {
-    "id": "_WALL",
-    "name": "_WALL",
-    "path": "collection.html?collection=_WALL",
+    "id": "Absense",
+    "name": "Absense",
+    "path": "collection.html?collection=Absense",
     "photoOrder": "asc",
     "createdAt": 1792318018000
   },
   {
-    "id": "COMSEC",
-    "name": "COMSEC",
-    "path": "collection.html?collection=COMSEC",
+    "id": "Bipolar&Obsession",
+    "name": "Bipolar&Obsession",
+    "path": "collection.html?collection=Bipolar%26Obsession",
     "photoOrder": "asc",
     "createdAt": 1792318016000
   }
