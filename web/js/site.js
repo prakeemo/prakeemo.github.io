@@ -1,5 +1,12 @@
 (function () {
   const SITE_NAME = "Kim donghyun";
+  const ASSET_V = "20261101a";
+
+  function assetUrl(path) {
+    const value = String(path || "");
+    if (!value || value.startsWith("data:") || /^https?:/i.test(value)) return value;
+    return value + (value.includes("?") ? "&" : "?") + "v=" + ASSET_V;
+  }
 
   function displayName(id) {
     const raw = id && String(id).startsWith("_") ? String(id).slice(1) : String(id || "");
@@ -83,7 +90,7 @@
   }
 
   async function loadCollections(catalog) {
-    const res = await fetch(catalog || "collections.json", { cache: "no-store" });
+    const res = await fetch(assetUrl(catalog || "collections.json"), { cache: "no-store" });
     if (!res.ok) return [];
     const list = await res.json();
     if (!Array.isArray(list)) return [];
@@ -94,11 +101,13 @@
 
   async function loadImages(collectionId, folder) {
     const res = await fetch(
-      "menu/" +
-        encodeURIComponent(folder || "Work") +
-        "/" +
-        encodeURIComponent(collectionId) +
-        "/images.json",
+      assetUrl(
+        "menu/" +
+          encodeURIComponent(folder || "Work") +
+          "/" +
+          encodeURIComponent(collectionId) +
+          "/images.json"
+      ),
       { cache: "no-store" }
     );
     if (!res.ok) return [];
@@ -848,7 +857,7 @@
     if (list) {
       let catalog = [];
       try {
-        const res = await fetch("cv.json", { cache: "no-store" });
+        const res = await fetch(assetUrl("cv.json"), { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
           catalog = Array.isArray(data) ? data : [];
@@ -933,7 +942,7 @@
         "/" +
         encodeURIComponent(folder) +
         "/images.json";
-      fetch(url, { cache: "no-store" })
+      fetch(assetUrl(url), { cache: "no-store" })
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
           if (!data) return;
@@ -1087,7 +1096,7 @@
     if (!root) return;
     let files = [];
     try {
-      const res = await fetch("contact.json", { cache: "no-store" });
+      const res = await fetch(assetUrl("contact.json"), { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         files = Array.isArray(data.files) ? data.files : [];
