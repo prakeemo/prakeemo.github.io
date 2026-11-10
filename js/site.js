@@ -1,6 +1,6 @@
 (function () {
   const SITE_NAME = "Kim donghyun";
-  const ASSET_V = "20261111e";
+  const ASSET_V = "20261111f";
 
   function assetUrl(path) {
     const value = String(path || "");
@@ -1093,7 +1093,7 @@
     if (!root) return;
     let files = [];
     try {
-      const res = await fetch(assetUrl("contact.json"), { cache: "no-store" });
+      const res = await fetch(assetUrl("mail.json"), { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         files = Array.isArray(data.files) ? data.files : [];
@@ -1103,7 +1103,7 @@
     }
     const pages = [];
     for (const src of files) {
-      const res = await fetch(src, { cache: "no-store" });
+      const res = await fetch(assetUrl(src), { cache: "no-store" });
       if (res.ok) pages.push(await res.text());
     }
     root.textContent = "";
