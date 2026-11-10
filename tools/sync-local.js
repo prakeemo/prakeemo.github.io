@@ -175,8 +175,9 @@ async function loadCollectionsJson() {
 }
 
 async function saveCollectionsJson(list) {
-  const file = path.join(ROOT, "collections.json");
-  await fs.writeFile(file, JSON.stringify(list, null, 2), "utf8");
+  const payload = JSON.stringify(list, null, 2);
+  await fs.writeFile(path.join(ROOT, "collections.json"), payload, "utf8");
+  await fs.writeFile(path.join(ROOT, "work.json"), payload, "utf8");
 }
 
 function run(cmd, cwd = ROOT) {
