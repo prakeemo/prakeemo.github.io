@@ -1,6 +1,6 @@
 (function () {
   const SITE_NAME = "Kim donghyun";
-  const ASSET_V = "20261110c";
+  const ASSET_V = "20261110d";
 
   function assetUrl(path) {
     const value = String(path || "");
@@ -44,18 +44,20 @@
 
   function imageUrl(collectionId, item, folder) {
     const src = String((item && item.src) || "");
+    let path;
     if (src.startsWith("menu/")) {
-      return src.split("/").map((part) => encodeURIComponent(part)).join("/");
+      path = src.split("/").map((part) => encodeURIComponent(part)).join("/");
+    } else {
+      const filename = src.split("/").pop() || "";
+      path =
+        "menu/" +
+        encodeURIComponent(folder || "Work") +
+        "/" +
+        encodeURIComponent(collectionId) +
+        "/" +
+        encodeURIComponent(filename);
     }
-    const filename = src.split("/").pop() || "";
-    return (
-      "menu/" +
-      encodeURIComponent(folder || "Work") +
-      "/" +
-      encodeURIComponent(collectionId) +
-      "/" +
-      encodeURIComponent(filename)
-    );
+    return assetUrl(path);
   }
 
   function visibleImages(data) {
@@ -900,10 +902,7 @@
         images.forEach((item) => {
           const img = document.createElement("img");
           img.alt = "";
-          img.src = String(item.src || "")
-            .split("/")
-            .map((part) => encodeURIComponent(part))
-            .join("/");
+          img.src = imageUrl("", item, "C.V");
           grid.appendChild(img);
         });
         parent.appendChild(grid);
