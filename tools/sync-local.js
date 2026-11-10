@@ -224,6 +224,7 @@ async function generateCollectionImagesJson(collectionId) {
   await fs.writeFile(path.join(dir, "shots.json"), payload, "utf8");
   await fs.writeFile(path.join(dir, "reel.json"), payload, "utf8");
   await fs.writeFile(path.join(dir, "cut.json"), payload, "utf8");
+  await fs.writeFile(path.join(dir, "take.json"), payload, "utf8");
   return { count: images.length, background: backgroundFile, optimized };
 }
 
@@ -478,6 +479,7 @@ async function writeLibraryImages(dir, urlPrefix, collectionId, options) {
   await fs.writeFile(path.join(folder, "shots.json"), payload, "utf8");
   await fs.writeFile(path.join(folder, "reel.json"), payload, "utf8");
   await fs.writeFile(path.join(folder, "cut.json"), payload, "utf8");
+  await fs.writeFile(path.join(folder, "take.json"), payload, "utf8");
   return { count: images.length, optimized, images, groups: groups.length };
 }
 
