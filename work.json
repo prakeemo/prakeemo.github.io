@@ -1,0 +1,44 @@
+[
+  {
+    "id": "Absense",
+    "name": "Absense",
+    "path": "collection.html?collection=Absense",
+    "photoOrder": "asc",
+    "createdAt": 1793180310002
+  },
+  {
+    "id": "Bipolar & Obsession",
+    "name": "Bipolar & Obsession",
+    "path": "collection.html?collection=Bipolar%20%26%20Obsession",
+    "photoOrder": "asc",
+    "createdAt": 1793180310001
+  },
+  {
+    "id": "Love is",
+    "name": "Love is",
+    "path": "collection.html?collection=Love%20is",
+    "photoOrder": "asc",
+    "createdAt": 1793180310000
+  },
+  {
+    "id": "If you had wings",
+    "name": "If you had wings",
+    "path": "collection.html?collection=If%20you%20had%20wings",
+    "photoOrder": "asc",
+    "createdAt": 1793179051000
+  },
+  {
+    "id": "shizuoka",
+    "name": "shizuoka",
+    "path": "collection.html?collection=shizuoka",
+    "photoOrder": "asc",
+    "createdAt": 1792318025000
+  },
+  {
+    "id": "Blooming",
+    "name": "Blooming",
+    "path": "collection.html?collection=Blooming",
+    "photoOrder": "asc",
+    "createdAt": 1792318023000
+  }
+]
