@@ -816,7 +816,7 @@ body[data-menu="text"] .work-index nav {
 .overview {
   margin-top: 64px;
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px 12px;
   padding: 28px 20px 48px;
 }
@@ -1211,6 +1211,6 @@ body[data-menu="text"] .work-index nav {
   }
 
   .overview {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
