@@ -451,7 +451,11 @@ async function writeLibraryImages(dir, urlPrefix, collectionId, options) {
       entries
         .filter(
           (entry) =>
-            entry.isDirectory() && !entry.name.startsWith(".") && entry.name !== DISPLAY_DIR
+            entry.isDirectory() &&
+            !entry.name.startsWith(".") &&
+            entry.name !== DISPLAY_DIR &&
+            entry.name !== "display" &&
+            entry.name !== "show"
         )
         .map((entry) => entry.name)
     );
@@ -494,7 +498,9 @@ async function syncContact() {
   );
   withBirth.sort((a, b) => b.birthtime - a.birthtime || a.name.localeCompare(b.name, "ko"));
   const files = withBirth.map((item) => "menu/Contact/" + encodeURIComponent(item.name));
-  await fs.writeFile(path.join(ROOT, "contact.json"), JSON.stringify({ files }, null, 2), "utf8");
+  const payload = JSON.stringify({ files }, null, 2);
+  await fs.writeFile(path.join(ROOT, "contact.json"), payload, "utf8");
+  await fs.writeFile(path.join(ROOT, "mail.json"), payload, "utf8");
   console.log(`✉️  Contact HTML ${files.length}개`);
   return true;
 }
