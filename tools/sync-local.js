@@ -217,6 +217,7 @@ async function generateCollectionImagesJson(collectionId) {
   const payload = JSON.stringify(data, null, 2);
   await fs.writeFile(outFile, payload, "utf8");
   await fs.writeFile(path.join(dir, "slides.json"), payload, "utf8");
+  await fs.writeFile(path.join(dir, "album.json"), payload, "utf8");
   return { count: images.length, background: backgroundFile, optimized };
 }
 
@@ -461,6 +462,7 @@ async function writeLibraryImages(dir, urlPrefix, collectionId, options) {
   const payload = JSON.stringify(data, null, 2);
   await fs.writeFile(path.join(folder, "images.json"), payload, "utf8");
   await fs.writeFile(path.join(folder, "slides.json"), payload, "utf8");
+  await fs.writeFile(path.join(folder, "album.json"), payload, "utf8");
   return { count: images.length, optimized, images, groups: groups.length };
 }
 

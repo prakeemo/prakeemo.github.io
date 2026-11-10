@@ -1,0 +1,41 @@
+{
+  "background": null,
+  "images": [
+    {
+      "src": "menu/Work/Absense/display/1.jpg",
+      "alt": "1"
+    },
+    {
+      "src": "menu/Work/Absense/display/2.jpg",
+      "alt": "2"
+    },
+    {
+      "src": "menu/Work/Absense/display/3.jpg",
+      "alt": "3"
+    },
+    {
+      "src": "menu/Work/Absense/display/4.jpg",
+      "alt": "4"
+    },
+    {
+      "src": "menu/Work/Absense/display/5.jpg",
+      "alt": "5"
+    },
+    {
+      "src": "menu/Work/Absense/display/6.jpg",
+      "alt": "6"
+    },
+    {
+      "src": "menu/Work/Absense/display/7.jpg",
+      "alt": "7"
+    },
+    {
+      "src": "menu/Work/Absense/display/8.jpg",
+      "alt": "8"
+    },
+    {
+      "src": "menu/Work/Absense/display/9.jpg",
+      "alt": "9"
+    }
+  ]
+}
