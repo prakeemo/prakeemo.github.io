@@ -1,6 +1,6 @@
 (function () {
   const SITE_NAME = "Kim donghyun";
-  const ASSET_V = "20261110a";
+  const ASSET_V = "20261110b";
 
   function assetUrl(path) {
     const value = String(path || "");
@@ -83,10 +83,8 @@
   function captionFor(item) {
     const stem = fileStem(item && item.src).trim();
     const indexed = stem.match(/^\d+_(.*)$/);
-    if (indexed && indexed[1].trim()) return indexed[1].trim();
-    const alt = item && item.alt ? String(item.alt).trim() : "";
-    if (!alt || alt === stem) return "";
-    return alt;
+    if (!indexed || !indexed[1].trim()) return "";
+    return indexed[1].trim();
   }
 
   async function loadCollections(catalog) {
@@ -106,7 +104,7 @@
           encodeURIComponent(folder || "Work") +
           "/" +
           encodeURIComponent(collectionId) +
-          "/images.json"
+          "/slides.json"
       ),
       { cache: "no-store" }
     );
