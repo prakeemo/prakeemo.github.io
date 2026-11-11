@@ -1,6 +1,6 @@
 (function () {
   const SITE_NAME = "Kim donghyun";
-  const ASSET_V = "20261111n";
+  const ASSET_V = "20261111o";
 
   function assetUrl(path) {
     const value = String(path || "");
@@ -106,7 +106,7 @@
           encodeURIComponent(folder || "Work") +
           "/" +
           encodeURIComponent(collectionId) +
-          "/lot.json"
+          "/mix.json"
       ),
       { cache: "no-store" }
     );
