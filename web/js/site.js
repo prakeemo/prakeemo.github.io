@@ -1,6 +1,6 @@
 (function () {
   const SITE_NAME = "Kim donghyun";
-  const ASSET_V = "20261111o";
+  const ASSET_V = "20261111p";
 
   function assetUrl(path) {
     const value = String(path || "");
@@ -21,7 +21,7 @@
     work: {
       id: "work",
       folder: "Work",
-      catalog: "names.json",
+      catalog: "list.json",
       back: "work.html",
     },
     cv: {
@@ -90,7 +90,7 @@
   }
 
   async function loadCollections(catalog) {
-    const res = await fetch(assetUrl(catalog || "names.json"), { cache: "no-store" });
+    const res = await fetch(assetUrl(catalog || "list.json"), { cache: "no-store" });
     if (!res.ok) return [];
     const list = await res.json();
     if (!Array.isArray(list)) return [];

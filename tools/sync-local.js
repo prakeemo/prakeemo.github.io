@@ -180,6 +180,7 @@ async function saveCollectionsJson(list) {
   await fs.writeFile(path.join(ROOT, "work.json"), payload, "utf8");
   await fs.writeFile(path.join(ROOT, "titles.json"), payload, "utf8");
   await fs.writeFile(path.join(ROOT, "names.json"), payload, "utf8");
+  await fs.writeFile(path.join(ROOT, "list.json"), payload, "utf8");
 }
 
 function run(cmd, cwd = ROOT) {
