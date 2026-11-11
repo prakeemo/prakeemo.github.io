@@ -7,7 +7,7 @@ const fs = require("fs").promises;
 const path = require("path");
 const sharp = require("sharp");
 
-const DISPLAY_DIR = "opt";
+const DISPLAY_DIR = "pic";
 const LONG_EDGE = 2400;
 const QUALITY = 82;
 
