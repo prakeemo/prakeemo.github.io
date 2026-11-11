@@ -2,60 +2,12 @@
   "background": null,
   "images": [
     {
-      "src": "menu/Work/Love is/show/1_Love is (2026), 120mm digital.jpg",
-      "alt": "Love is (2026), 120mm digital"
+      "src": "menu/Work/Love is/show/1.jpg",
+      "alt": "1"
     },
     {
-      "src": "menu/Work/Love is/show/2_Love is (2026), 120mm digital.jpg",
-      "alt": "Love is (2026), 120mm digital"
-    },
-    {
-      "src": "menu/Work/Love is/show/3.jpg",
-      "alt": "3"
-    },
-    {
-      "src": "menu/Work/Love is/show/4.jpg",
-      "alt": "4"
-    },
-    {
-      "src": "menu/Work/Love is/show/5.jpg",
-      "alt": "5"
-    },
-    {
-      "src": "menu/Work/Love is/show/6.jpg",
-      "alt": "6"
-    },
-    {
-      "src": "menu/Work/Love is/show/7.jpg",
-      "alt": "7"
-    },
-    {
-      "src": "menu/Work/Love is/show/8.jpg",
-      "alt": "8"
-    },
-    {
-      "src": "menu/Work/Love is/show/9.jpg",
-      "alt": "9"
-    },
-    {
-      "src": "menu/Work/Love is/show/10.jpg",
-      "alt": "10"
-    },
-    {
-      "src": "menu/Work/Love is/show/11.jpg",
-      "alt": "11"
-    },
-    {
-      "src": "menu/Work/Love is/show/12.jpg",
-      "alt": "12"
-    },
-    {
-      "src": "menu/Work/Love is/show/13.jpg",
-      "alt": "13"
-    },
-    {
-      "src": "menu/Work/Love is/show/14.jpg",
-      "alt": "14"
+      "src": "menu/Work/Love is/show/2.jpg",
+      "alt": "2"
     }
   ]
 }
