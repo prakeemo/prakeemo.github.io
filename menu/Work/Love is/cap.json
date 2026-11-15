@@ -1,0 +1,37 @@
+{
+  "background": null,
+  "images": [
+    {
+      "src": "menu/Work/Love is/pic/1.jpg",
+      "alt": "1"
+    },
+    {
+      "src": "menu/Work/Love is/pic/2.jpg",
+      "alt": "2"
+    },
+    {
+      "src": "menu/Work/Love is/pic/3.jpg",
+      "alt": "3"
+    },
+    {
+      "src": "menu/Work/Love is/pic/4.jpg",
+      "alt": "4"
+    },
+    {
+      "src": "menu/Work/Love is/pic/5.jpg",
+      "alt": "5"
+    },
+    {
+      "src": "menu/Work/Love is/pic/6.jpg",
+      "alt": "6"
+    },
+    {
+      "src": "menu/Work/Love is/pic/7.jpg",
+      "alt": "7"
+    },
+    {
+      "src": "menu/Work/Love is/pic/8.jpg",
+      "alt": "8"
+    }
+  ]
+}
