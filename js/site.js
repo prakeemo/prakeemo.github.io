@@ -1,6 +1,6 @@
 (function () {
   const SITE_NAME = "Kim donghyun";
-  const ASSET_V = "20261111s";
+  const ASSET_V = "20261115a";
 
   function assetUrl(path) {
     const value = String(path || "");
@@ -842,9 +842,10 @@
 
     const nameEl = document.querySelector(".cv-name");
     if (nameEl) {
-      fetch("menu/" + encodeURIComponent("C.V") + "/" + encodeURIComponent("C.V.txt"), {
-        cache: "no-store",
-      })
+      fetch(
+        assetUrl("menu/" + encodeURIComponent("C.V") + "/" + encodeURIComponent("name.txt")),
+        { cache: "no-store" }
+      )
         .then((res) => (res.ok ? res.text() : ""))
         .then((text) => {
           const value = String(text || "").replace(/^\uFEFF/, "").trim();
